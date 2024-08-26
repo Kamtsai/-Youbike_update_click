@@ -7,7 +7,9 @@ import random
 # Line Messaging API
 LINE_CHANNEL_ACCESS_TOKEN = os.environ['LINE_CHANNEL_ACCESS_TOKEN']
 LINE_USER_ID = os.environ['LINE_USER_ID']  # 您的Line用户ID或群组ID
-
+if not LINE_USER_ID:
+    raise ValueError("LINE_USER_ID is not set. Please set it in GitHub Secrets.")
+    
 TARGET_STATIONS = [
     "捷運忠孝新生站(3號出口)",
     "捷運忠孝新生站(4號出口)",
