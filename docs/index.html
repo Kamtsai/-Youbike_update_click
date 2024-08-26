@@ -1,20 +1,16 @@
+=====================
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Webhook Receiver</title>
+    <title>YouBike Updater</title>
 </head>
 <body>
-    <form id="webhookForm" action="https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/dispatches" method="POST">
-        <input type="hidden" name="event_type" value="line-webhook">
-        <input type="hidden" name="client_payload" id="payload">
-    </form>
+    <h1>YouBike Updater</h1>
+    <p>This page will trigger a YouBike update.</p>
+    <button onclick="triggerUpdate()">Update YouBike Info</button>
 
     <script>
-    window.addEventListener('load', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const payload = Object.fromEntries(urlParams);
-        document.getElementById('payload').value = JSON.stringify(payload);
-        
+    function triggerUpdate() {
         fetch('https://api.github.com/repos/Kamtsai/-Youbike_update_click/dispatches', {
             method: 'POST',
             headers: {
@@ -23,15 +19,14 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                event_type: 'line-webhook',
-                client_payload: payload
+                event_type: 'update-youbike'
             })
         }).then(response => {
-            console.log('Webhook sent:', response.status);
+            alert('Update triggered: ' + response.status);
         }).catch(error => {
-            console.error('Error:', error);
+            alert('Error: ' + error);
         });
-    });
+    }
     </script>
 </body>
 </html>
