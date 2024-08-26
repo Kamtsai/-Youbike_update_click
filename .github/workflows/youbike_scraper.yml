@@ -4,47 +4,51 @@ on:
   schedule:
     - cron: '0 * * * *'  # 每小时运行一次
   workflow_dispatch:  # 允许手动触发
+  repository_dispatch:  # 允许通过 API 触发
+    types: [line-webhook]
 
 jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
+    - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install requests
+    - name: Process Line webhook
+      if: github.event_name == 'repository_dispatch'
+      env:
+        LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      run: |
+        import json
+        import os
+        import requests
 
+        def send_line_reply(reply_token, message):
+            url = 'https://api.line.me/v2/bot/message/reply'
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {os.environ["LINE_CHANNEL_ACCESS_TOKEN"]}'
+            }
+            data = {
+                'replyToken': reply_token,
+                'messages': [{'type': 'text', 'text': message}]
+            }
+            response = requests.post(url, headers=headers, json=data)
+            print(f"Line API response: {response.status_code}")
+            response.raise_for_status()
+
+        payload = ${{ toJson(github.event.client_payload) }}
+        if payload.get('events')[0]['message']['text'].lower() == 'youbike':
+            send_line_reply(payload['events'][0]['replyToken'], "正在获取 YouBike 信息，请稍候...")
+      shell: python
     - name: Run scraper
       env:
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
         LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
-      run: |
-        python youbike_scraper.py
-      
-    - name: Check for errors
-      if: failure()
-      env:
-        LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-        LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
-      run: |
-        error_message="YouBike爬虫脚本运行失败，请检查日志。"
-        curl -X POST https://api.line.me/v2/bot/message/push \
-          -H "Content-Type: application/json" \
-          -H "Authorization: Bearer $LINE_CHANNEL_ACCESS_TOKEN" \
-          -d '{
-            "to": "'"$LINE_USER_ID"'",
-            "messages":[
-              {
-                "type":"text",
-                "text":"'"$error_message"'"
-              }
-            ]
-          }'
+      run: python youbike_scraper.py
