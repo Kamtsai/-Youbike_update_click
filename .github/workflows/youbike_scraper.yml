@@ -7,6 +7,7 @@ on:
   repository_dispatch:  # 允许通过 API 触发
     types: [line-webhook]
 
+
 jobs:
   scrape-and-notify:
     runs-on: ubuntu-latest
@@ -48,6 +49,32 @@ jobs:
             send_line_reply(payload['events'][0]['replyToken'], "正在获取 YouBike 信息，请稍候...")
       shell: python
     - name: Run scraper
+      env:
+        LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+        LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+      run: python youbike_scraper.py
+
+===============================
+name: Update YouBike Info
+
+on:
+  repository_dispatch:
+    types: [update-youbike]
+
+jobs:
+  update-youbike:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    - name: Run YouBike scraper
       env:
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
         LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
