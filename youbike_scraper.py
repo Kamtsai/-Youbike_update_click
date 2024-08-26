@@ -67,10 +67,21 @@ def send_line_message(message):
         'to': LINE_USER_ID,
         'messages': [{'type': 'text', 'text': message}]
     }
-    response = requests.post(url, headers=headers, json=data)
-    print(f"Line API response: {response.status_code}")
-    response.raise_for_status()
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        print(f"Line API response status: {response.status_code}")
+        print(f"Line API response content: {response.text}")
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error sending Line message: {e}")
+        print(f"Request data: {data}")
+        print(f"Response content: {e.response.text if e.response else 'No response'}")
+        raise
 
 if __name__ == "__main__":
-    result = scrape_youbike()
-    send_line_message(result)
+    try:
+        result = scrape_youbike()
+        print(f"Scrape result: {result}")
+        send_line_message(result)
+    except Exception as e:
+        print(f"An error occurred: {e}")
