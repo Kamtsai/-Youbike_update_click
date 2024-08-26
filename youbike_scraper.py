@@ -58,6 +58,10 @@ def scrape_youbike():
     return "\n".join(results)
 
 def send_line_message(message):
+    if not LINE_USER_ID:
+        print("Error: LINE_USER_ID is empty")
+        return
+
     url = 'https://api.line.me/v2/bot/message/push'
     headers = {
         'Content-Type': 'application/json',
@@ -68,6 +72,7 @@ def send_line_message(message):
         'messages': [{'type': 'text', 'text': message}]
     }
     try:
+        print(f"Sending message to User ID: {LINE_USER_ID}")
         response = requests.post(url, headers=headers, json=data)
         print(f"Line API response status: {response.status_code}")
         print(f"Line API response content: {response.text}")
