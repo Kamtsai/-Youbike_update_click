@@ -11,20 +11,32 @@
 
     <script>
     function triggerUpdate() {
-        fetch('https://api.github.com/repos/Kamtsai/-Youbike_update_click/dispatches', {
+        const url = 'https://api.github.com/repos/Kamtsai/-Youbike_update_click/dispatches';
+        const token = 'YOUR_GITHUB_TOKEN'; // 请替换为实际的 token
+    
+        fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': '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',
+                'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 event_type: 'update-youbike'
             })
-        }).then(response => {
-            alert('Update triggered: ' + response.status);
-        }).catch(error => {
-            alert('Error: ' + error);
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Response body:', text);
+            alert(`Update triggered: ${response.status}`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(`Error: ${error.message}`);
         });
     }
     </script>
