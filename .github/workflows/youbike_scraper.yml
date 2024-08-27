@@ -22,12 +22,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests beautifulsoup4
+        pip install requests
 
     - name: Run YouBike scraper
       env:
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-      run: python youbike_scraper.py
+        LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+      run: |
+        python youbike_scraper.py
 
     - name: Commit and push if there are changes
       run: |
@@ -40,7 +42,17 @@ jobs:
       if: failure()
       env:
         LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+        LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
       run: |
-        curl -X POST https://notify-api.line.me/api/notify \
+        curl -X POST https://api.line.me/v2/bot/message/push \
         -H "Authorization: Bearer $LINE_CHANNEL_ACCESS_TOKEN" \
-        -F "message=YouBike更新失败，请检查GitHub Actions日志。"
+        -H 'Content-Type: application/json' \
+        -d '{
+            "to": "'"$LINE_USER_ID"'",
+            "messages":[
+                {
+                    "type":"text",
+                    "text":"YouBike更新失败，请检查GitHub Actions日志。"
+                }
+            ]
+        }'
