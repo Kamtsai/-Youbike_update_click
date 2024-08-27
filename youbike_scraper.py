@@ -1,7 +1,6 @@
 import requests
 import os
 import json
-import sys
 
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_USER_ID = os.environ.get('LINE_USER_ID')
@@ -31,12 +30,18 @@ def scrape_youbike():
 
         results = []
         for station in data:
-            if station['sna'] in TARGET_STATIONS:
-                available_bikes = station['sbi']
-                results.append(f"{station['sna']}: {available_bikes}")
+            if 'sna' in station and 'sbi' in station:
+                station_name = station['sna']
+                if any(target in station_name for target in TARGET_STATIONS):
+                    available_bikes = station['sbi']
+                    results.append(f"{station_name}: {available_bikes}")
         
         print(f"匹配到 {len(results)} 个目标站点")
-        return "\n".join(results)
+        if not results:
+            print("未找到匹配的站点，显示所有站点名称：")
+            for station in data[:10]:  # 只显示前10个站点名称
+                print(station.get('sna', 'Unknown station name'))
+        return results
     except Exception as e:
         print(f"爬取过程中发生错误: {e}")
         return None
@@ -65,10 +70,11 @@ def send_line_message(message):
 
 def main():
     print("YouBike 爬虫开始运行...")
-    result = scrape_youbike()
-    if result:
+    results = scrape_youbike()
+    if results:
         print("爬取成功，准备发送 Line 消息...")
-        send_line_message(f"YouBike站點可借車輛數量:\n{result}")
+        message = "YouBike站點可借車輛數量:\n" + "\n".join(results)
+        send_line_message(message)
     else:
         print("爬取失败，未找到数据")
         send_line_message("YouBike爬虫未找到目标站点数据，请检查脚本。")
