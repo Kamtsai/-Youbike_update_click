@@ -11,33 +11,26 @@
 
     <script>
     function triggerUpdate() {
-        const url = 'https://api.github.com/repos/Kamtsai/-Youbike_update_click/dispatches';
-        const token = 'YOUR_GITHUB_TOKEN'; // 请替换为实际的 token
-    
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                event_type: 'update-youbike'
-            })
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            return response.text();
-        })
-        .then(text => {
-            console.log('Response body:', text);
-            alert(`Update triggered: ${response.status}`);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert(`Error: ${error.message}`);
-        });
+      fetch('https://api.github.com/repos/Kamtsai/-Youbike_update_click/dispatches', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'token YOUR_GITHUB_TOKEN',
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ event_type: 'update-youbike' })
+      })
+      .then(response => {
+        if (response.status === 204) {
+          alert('Update triggered successfully!');
+        } else {
+          alert('Failed to trigger update. Status: ' + response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error triggering update: ' + error.message);
+      });
     }
     </script>
 </body>
