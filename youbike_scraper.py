@@ -2,28 +2,26 @@ import requests
 import os
 import json
 
-# 从环境变量获取Line Notify token
 LINE_NOTIFY_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
 
-# 目标站点列表
 TARGET_STATIONS = [
-    "捷運忠孝新生站(3號出口)",
-    "捷運忠孝新生站(4號出口)",
-    "捷運忠孝新生站(2號出口)",
-    "捷運忠孝新生站(1號出口)",
-    "捷運忠孝復興站(2號出口)",
-    "忠孝東路四段49巷口",
-    "捷運忠孝復興站(3號出口)",
-    "信義大安路口(信維大樓)",
-    "敦化信義路口(東南側)",
-    "信義敦化路口"
+    "YouBike2.0_捷運忠孝新生站(3號出口)",
+    "YouBike2.0_捷運忠孝新生站(4號出口)",
+    "YouBike2.0_捷運忠孝新生站(2號出口)",
+    "YouBike2.0_捷運忠孝新生站(1號出口)",
+    "YouBike2.0_捷運忠孝復興站(2號出口)",
+    "YouBike2.0_忠孝東路四段49巷口",
+    "YouBike2.0_捷運忠孝復興站(3號出口)",
+    "YouBike2.0_信義大安路口(信維大樓)",
+    "YouBike2.0_敦化信義路口(東南側)",
+    "YouBike2.0_信義敦化路口"
 ]
 
 def scrape_youbike():
     url = "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
     try:
         response = requests.get(url)
-        response.raise_for_status()  # 如果请求失败,将引发异常
+        response.raise_for_status()
         print(f"API Response Status: {response.status_code}")
         data = response.json()
         print(f"Total stations received: {len(data)}")
@@ -31,14 +29,14 @@ def scrape_youbike():
 
         results = []
         for station in data:
-            if station.get('sna') in TARGET_STATIONS:
+            if any(target in station.get('sna', '') for target in TARGET_STATIONS):
                 available_bikes = station.get('sbi', 'N/A')
                 results.append(f"{station['sna']}: {available_bikes}")
         
         print(f"Matched stations: {len(results)}")
         if not results:
             print("Target stations not found. Available stations:")
-            for station in data[:10]:  # 只打印前10个站点作为示例
+            for station in data[:10]:
                 print(f"- {station.get('sna', 'Unknown')}")
         
         return "\n".join(results)
