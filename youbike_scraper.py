@@ -6,12 +6,12 @@ LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_USER_ID = os.environ.get('LINE_USER_ID')
 
 TARGET_STATIONS = [
-    "忠孝新生站",
-    "忠孝復興站",
-    "忠孝東路四段49巷口",
-    "信義大安路口",
-    "敦化信義路口",
-    "信義敦化路口"
+    "YouBike2.0_捷運忠孝新生站",
+    "YouBike2.0_捷運忠孝復興站",
+    "YouBike2.0_忠孝東路四段49巷口",
+    "YouBike2.0_信義大安路口",
+    "YouBike2.0_敦化信義路口",
+    "YouBike2.0_信義敦化路口"
 ]
 
 def scrape_youbike():
