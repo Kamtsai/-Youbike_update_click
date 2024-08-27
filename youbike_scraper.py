@@ -6,16 +6,12 @@ LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_USER_ID = os.environ.get('LINE_USER_ID')
 
 TARGET_STATIONS = [
-    "YouBike2.0_捷運忠孝新生站(3號出口)",
-    "YouBike2.0_捷運忠孝新生站(4號出口)",
-    "YouBike2.0_捷運忠孝新生站(2號出口)",
-    "YouBike2.0_捷運忠孝新生站(1號出口)",
-    "YouBike2.0_捷運忠孝復興站(2號出口)",
-    "YouBike2.0_忠孝東路四段49巷口",
-    "YouBike2.0_捷運忠孝復興站(3號出口)",
-    "YouBike2.0_信義大安路口(信維大樓)",
-    "YouBike2.0_敦化信義路口(東南側)",
-    "YouBike2.0_信義敦化路口"
+    "忠孝新生站",
+    "忠孝復興站",
+    "忠孝東路四段49巷口",
+    "信義大安路口",
+    "敦化信義路口",
+    "信義敦化路口"
 ]
 
 def scrape_youbike():
@@ -39,11 +35,17 @@ def scrape_youbike():
         print(f"匹配到 {len(results)} 个目标站点")
         if not results:
             print("未找到匹配的站点，显示所有站点名称：")
-            for station in data[:10]:  # 只显示前10个站点名称
+            for station in data[:20]:  # 显示前20个站点名称
                 print(station.get('sna', 'Unknown station name'))
         return results
+    except requests.RequestException as e:
+        print(f"请求失败: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"JSON 解析失败: {e}")
+        return None
     except Exception as e:
-        print(f"爬取过程中发生错误: {e}")
+        print(f"爬取过程中发生未知错误: {e}")
         return None
 
 def send_line_message(message):
@@ -65,8 +67,9 @@ def send_line_message(message):
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         print(f"Line 消息发送成功，响应状态: {response.status_code}")
-    except Exception as e:
+    except requests.RequestException as e:
         print(f"发送 Line 消息时发生错误: {e}")
+        print(f"错误响应: {e.response.text if e.response else 'No response'}")
 
 def main():
     print("YouBike 爬虫开始运行...")
