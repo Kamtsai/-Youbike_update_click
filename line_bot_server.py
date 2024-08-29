@@ -48,7 +48,7 @@ def handle_message(event):
         )
 
 def handle_text_message(event):
-    if event.message.text.lower() == "更新youbike":
+    if event.message.text.lower() == "1":
         try:
             results = scrape_youbike()
             if results:
